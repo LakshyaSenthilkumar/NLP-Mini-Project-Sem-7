@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_title }}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0B0F19',
+                        darkCard: '#1E293B',
+                        darkBorder: '#334155',
+                        brandBlue: '#3B82F6',
+                        brandEmerald: '#10B981',
+                        brandPurple: '#8B5CF6'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leaflet GIS CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Heatmap Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="bg-darkBg text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-50 glass-card border-b border-slate-800 px-6 py-3.5">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Logo & Brand Title -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 via-blue-600 to-emerald-500 flex items-center justify-center text-xl font-black shadow-lg shadow-blue-500/30">
+                    🚆
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-base font-bold text-white tracking-wide">TransitPulse AI • Mumbai</h1>
+                        <span class="text-[10px] font-mono bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded">MMR v{{ app_version }}</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Mumbai & Navi Mumbai Transport Feedback Intelligence (Bus, Train, Metro, Monorail)</p>
+                </div>
+            </div>
+
+            <!-- Global Live Pulse & Mumbai Simulation Controls -->
+            <div class="flex items-center flex-wrap gap-2.5">
+                <div class="flex items-center gap-2 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 text-xs">
+                    <span class="pulse-dot"></span>
+                    <span class="text-slate-300 font-medium">MMR NLP Core Active</span>
+                    <span id="header-csat-badge" class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-950 text-emerald-400 border border-emerald-700">CSAT: --%</span>
+                </div>
+
+                <!-- Mumbai Scenario Simulator Buttons -->
+                <div class="flex items-center gap-1.5 bg-slate-900/80 p-1 rounded-lg border border-slate-800 text-xs">
+                    <span class="text-slate-400 text-[11px] font-semibold px-1.5">⚡ Simulate:</span>
+                    <button data-scenario="rush_hour" class="btn-trigger-scenario px-2 py-1 rounded bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800 transition">Dadar Peak Crush</button>
+                    <button data-scenario="monsoon_delay" class="btn-trigger-scenario px-2 py-1 rounded bg-blue-950/80 hover:bg-blue-900 text-blue-300 border border-blue-800 transition">Monsoon Signal Delay</button>
+                    <button data-scenario="faregate_glitch" class="btn-trigger-scenario px-2 py-1 rounded bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-800 transition">UTS / Chalo Outage</button>
+                    <button data-scenario="positive_wave" class="btn-trigger-scenario px-2 py-1 rounded bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 transition">AC Local & Metro 3 Praise</button>
+                    <button id="btn-reset-simulation" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Reset dataset">🔄</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs Bar -->
+        <div class="max-w-7xl mx-auto mt-3 flex items-center gap-1 overflow-x-auto border-t border-slate-800/80 pt-2.5 text-xs font-semibold">
+            <button data-tab="overview" class="tab-btn px-4 py-2 rounded-lg border-b-2 text-blue-400 border-blue-500 bg-blue-950/40 transition flex items-center gap-2 whitespace-nowrap">
+                <span>📊</span> Executive Dashboard
+            </button>
+            <button data-tab="gis" class="tab-btn px-4 py-2 rounded-lg border-b-2 text-slate-400 border-transparent hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap">
+                <span>🗺️</span> Mumbai & Navi Mumbai GIS Map
+            </button>
+            <button data-tab="actions" class="tab-btn px-4 py-2 rounded-lg border-b-2 text-slate-400 border-transparent hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap">
+                <span>🎯</span> Decision Support & Actions
+            </button>
+            <button data-tab="explorer" class="tab-btn px-4 py-2 rounded-lg border-b-2 text-slate-400 border-transparent hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap">
+                <span>🔍</span> Feedback Explorer
+            </button>
+            <button data-tab="nlp-lab" class="tab-btn px-4 py-2 rounded-lg border-b-2 text-slate-400 border-transparent hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap">
+                <span>🧪</span> Mumbai NLP & NER Lab
+            </button>
+            <button data-tab="portal" class="tab-btn px-4 py-2 rounded-lg border-b-2 text-slate-400 border-transparent hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap">
+                <span>📱</span> Passenger Portal
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+        <!-- ================= TAB 1: EXECUTIVE DASHBOARD ================= -->
+        <div id="tab-overview" class="tab-content space-y-6">
+            
+            <!-- KPI Metric Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="glass-card rounded-xl p-4 border border-slate-800">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                        <span>Total Mumbai Feedback</span>
+                        <span class="text-blue-400">📥</span>
+                    </div>
+                    <div id="kpi-total-feedback" class="text-2xl font-black text-white">0</div>
+                    <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+                        <span class="text-emerald-400 font-bold">● Active</span> Bus, Train, Metro, Monorail
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 border border-slate-800">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                        <span>Commuter CSAT Index</span>
+                        <span class="text-emerald-400">⭐</span>
+                    </div>
+                    <div id="kpi-csat-score" class="text-2xl font-black text-emerald-400">--%</div>
+                    <div class="text-[11px] text-slate-400 mt-1">Passenger Satisfaction Index</div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 border border-slate-800">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                        <span>Net Sentiment Score (NSS)</span>
+                        <span class="text-purple-400">📈</span>
+                    </div>
+                    <div id="kpi-nss-score" class="text-2xl font-black text-purple-400">--</div>
+                    <div class="text-[11px] text-slate-400 mt-1">% Positive minus % Negative</div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 border border-slate-800">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                        <span>Active Open Tickets</span>
+                        <span class="text-amber-400">🎫</span>
+                    </div>
+                    <div id="kpi-open-tickets" class="text-2xl font-black text-amber-400">0</div>
+                    <div class="text-[11px] text-slate-400 mt-1">Pending WR/CR/BEST/MMRDA</div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 border border-slate-800 glow-danger">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                        <span>Critical Safety Alerts</span>
+                        <span class="pulse-dot-danger"></span>
+                    </div>
+                    <div id="kpi-critical-alerts" class="text-2xl font-black text-rose-400">0</div>
+                    <div class="text-[11px] text-rose-300 font-semibold mt-1">FOB / Footboard / Signal Hazards</div>
+                </div>
+            </div>
+
+            <!-- Charts Section 1: CSAT 7-Day Trend & Linear Forecast -->
+            <div class="glass-card rounded-xl p-5 border border-slate-800">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            <span>📈</span> MMR Satisfaction Trend & 7-Day Predictive Forecast
+                        </h2>
+                        <p class="text-xs text-slate-400">AI-driven moving average and confidence projection of Mumbai commuter satisfaction</p>
+                    </div>
+                    <span class="text-xs px-2.5 py-1 rounded bg-blue-950 text-blue-300 border border-blue-800 font-semibold">Suburban Rail & Metro Forecasting</span>
+                </div>
+                <div class="h-64 w-full">
+                    <canvas id="chart-forecast"></canvas>
+                </div>
+            </div>
+
+            <!-- Charts Section 2: Sentiment, Emotion Radar, Service Categories, Channels -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div class="glass-card rounded-xl p-5 border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-white mb-1">Sentiment Polarity</h3>
+                        <p class="text-[11px] text-slate-400 mb-3">Positive, Neutral, Negative split</p>
+                    </div>
+                    <div class="h-48 w-full">
+                        <canvas id="chart-sentiment"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-5 border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-white mb-1">Commuter Emotion Spectrum</h3>
+                        <p class="text-[11px] text-slate-400 mb-3">Anger, Frustration, Anxiety, Gratitude</p>
+                    </div>
+                    <div class="h-48 w-full">
+                        <canvas id="chart-emotion"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-5 border border-slate-800 lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-white mb-1">Service Categories Breakdown</h3>
+                        <p class="text-[11px] text-slate-400 mb-3">Delays, Overcrowding, Fares, Cleanliness, Safety, HVAC</p>
+                    </div>
+                    <div class="h-48 w-full">
+                        <canvas id="chart-category"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Channels & Ingestion Sources -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card rounded-xl p-5 border border-slate-800">
+                    <h3 class="text-sm font-bold text-white mb-1">Feedback Platforms</h3>
+                    <p class="text-[11px] text-slate-400 mb-3">Mobile App (M-Indicator/UTS/Chalo), Twitter, Email, Web</p>
+                    <div class="h-48 w-full">
+                        <canvas id="chart-channel"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-5 border border-slate-800 lg:col-span-2">
+                    <h3 class="text-sm font-bold text-white mb-1">Trending Mumbai Commuter Problem Signatures</h3>
+                    <p class="text-[11px] text-slate-400 mb-3">Extracted high-frequency bigrams and recurring complaints across MMR</p>
+                    <div id="trending-phrases-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= TAB 2: INTERACTIVE GIS MUMBAI MAP ================= -->
+        <div id="tab-gis" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-xl p-5 border border-slate-800">
+                
+                <!-- Map Header & Controls -->
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                    <div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            <span>🗺️</span> Mumbai & Navi Mumbai Transit Network GIS Map
+                        </h2>
+                        <p class="text-xs text-slate-400">Interactive GIS map showing Local Trains (Western, Central, Harbour), Metro Lines, Monorail, and BEST/NMMT Bus corridors</p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 text-xs">
+                            <span class="text-slate-400">Mode:</span>
+                            <select id="map-mode-filter" class="bg-slate-800 text-white rounded px-2 py-0.5 border border-slate-700">
+                                <option value="All">All Modes (Bus, Train, Metro, Monorail)</option>
+                                <option value="Train">Local Trains (Western, Central, Harbour)</option>
+                                <option value="Metro">Mumbai Metro (Lines 1, 2A, 7, 3)</option>
+                                <option value="Monorail">Mumbai Monorail (Chembur-Jacob Circle)</option>
+                                <option value="Bus">City Buses (BEST & NMMT)</option>
+                            </select>
+                        </div>
+
+                        <label class="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 text-xs cursor-pointer">
+                            <input id="map-toggle-heatmap" type="checkbox" checked class="rounded bg-slate-800 text-blue-600 focus:ring-0">
+                            <span class="text-slate-300 font-medium">Issue Heatmap</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Leaflet Map Container -->
+                <div id="gis-map" class="w-full h-[540px] rounded-xl border border-slate-800 z-10"></div>
+
+                <!-- GIS Legend -->
+                <div class="flex flex-wrap items-center justify-between gap-4 mt-4 pt-3 border-t border-slate-800 text-xs text-slate-400">
+                    <div class="flex items-center gap-4">
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500"></span> Local Train Hub (WR/CR)</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-sky-500"></span> Mumbai Metro</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Mumbai Monorail</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-500"></span> BEST/NMMT Bus</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-600 animate-ping"></span> Critical Bottleneck Hub</span>
+                    </div>
+                    <div class="text-[11px] text-slate-500">Click on any station marker or line to view real-time CSAT and commuter feedback breakdown</div>
+                </div>
+            </div>
+
+            <!-- Route Health Cards Grid -->
+            <div>
+                <h3 class="text-sm font-bold text-white mb-3">Mumbai Transit Lines Operational Health & Punctuality</h3>
+                <div id="gis-routes-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: DECISION SUPPORT & ACTIONS ================= -->
+        <div id="tab-actions" class="tab-content hidden space-y-6">
+            
+            <div class="glass-card rounded-xl p-5 border border-slate-800">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            <span>🎯</span> AI Decision Support & Action Recommendation Center
+                        </h2>
+                        <p class="text-xs text-slate-400">Prioritized operational directives for Central Railway, Western Railway, MMRDA, Monorail, and BEST/NMMT. Edit, add suggestions, or create custom directives.</p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- Create Custom Action Button -->
+                        <button id="btn-open-create-action" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-blue-500/20 flex items-center gap-1.5 transition">
+                            <span>➕</span> Add Custom Action / Suggestion
+                        </button>
+
+                        <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800 text-xs">
+                            <button data-priority="All" class="rec-priority-filter px-3 py-1 rounded bg-blue-600 text-white font-semibold transition">All</button>
+                            <button data-priority="Critical" class="rec-priority-filter px-3 py-1 rounded text-slate-400 hover:text-white font-semibold transition">Critical</button>
+                            <button data-priority="High" class="rec-priority-filter px-3 py-1 rounded text-slate-400 hover:text-white font-semibold transition">High</button>
+                            <button data-priority="Medium" class="rec-priority-filter px-3 py-1 rounded text-slate-400 hover:text-white font-semibold transition">Medium</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations Grid -->
+            <div id="recommendations-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Populated by actions.js -->
+            </div>
+
+            <!-- Clustered Operational Issues -->
+            <div class="glass-card rounded-xl p-5 border border-slate-800">
+                <h3 class="text-sm font-bold text-white mb-1">MMR Operational Bottleneck Clusters (Topic Modeling)</h3>
+                <p class="text-xs text-slate-400 mb-4">Semantic clusters grouped by recurring passenger complaints across South Mumbai, Suburbs, Thane & Navi Mumbai</p>
+                <div id="topic-clusters-container" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <!-- Populated by actions.js -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= TAB 4: FEEDBACK EXPLORER ================= -->
+        <div id="tab-explorer" class="tab-content hidden space-y-4">
+            
+            <div class="glass-card rounded-xl p-4 border border-slate-800 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                        <span>🔍</span> Mumbai & Navi Mumbai Multi-Channel Feedback Explorer
+                    </h2>
+                    <span id="feedback-count-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-950 text-blue-300 border border-blue-800">-- records</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 text-xs">
+                    <input id="filter-search" type="text" placeholder="Search Dadar, Kurla, AC Local, UTS..." class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500 lg:col-span-2">
+
+                    <select id="filter-mode" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-200">
+                        <option value="All">All Modes</option>
+                        <option value="Train">Local Train</option>
+                        <option value="Metro">Metro</option>
+                        <option value="Monorail">Monorail</option>
+                        <option value="Bus">Bus (BEST/NMMT)</option>
+                    </select>
+
+                    <select id="filter-sentiment" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-200">
+                        <option value="All">All Sentiments</option>
+                        <option value="Positive">Positive</option>
+                        <option value="Neutral">Neutral</option>
+                        <option value="Negative">Negative</option>
+                    </select>
+
+                    <select id="filter-severity" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-200">
+                        <option value="All">All Severities</option>
+                        <option value="Critical">Critical</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+
+                    <select id="filter-source" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-200">
+                        <option value="All">All Channels</option>
+                        <option value="Mobile App">Mobile App</option>
+                        <option value="Social Media">Social Media</option>
+                        <option value="Email">Email</option>
+                        <option value="Web Portal">Web Portal</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Feedback Table -->
+            <div class="glass-card rounded-xl border border-slate-800 overflow-hidden">
+                <div class="overflow-x-auto max-h-[580px]">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-900/90 text-[11px] font-bold text-slate-400 uppercase tracking-wider sticky top-0 border-b border-slate-800">
+                            <tr>
+                                <th class="py-3 px-4">Ticket ID</th>
+                                <th class="py-3 px-4">Passenger Feedback & Mumbai Entities</th>
+                                <th class="py-3 px-4">Category</th>
+                                <th class="py-3 px-4">Sentiment & Emotion</th>
+                                <th class="py-3 px-4">Severity</th>
+                                <th class="py-3 px-4">Action Status</th>
+                                <th class="py-3 px-4">Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feedback-table-body" class="divide-y divide-slate-800">
+                            <!-- Populated by dashboard.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 5: MUMBAI NLP & NER LAB ================= -->
+        <div id="tab-nlp-lab" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-xl p-5 border border-slate-800">
+                <div class="mb-4">
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <span>🧪</span> Live Mumbai Transit NLP & NER Intelligence Sandbox
+                    </h2>
+                    <p class="text-xs text-slate-400">Test AI classification, sentiment polarity, and Mumbai entity extraction on any commuter sentence.</p>
+                </div>
+
+                <div class="space-y-3">
+                    <textarea id="nlp-input-text" rows="3" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl p-3.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500 placeholder-slate-500" placeholder="Type or paste any Mumbai commuter feedback here (e.g., 'Massive rush hour crowd on Dadar Junction platform 3 and Western Line AC local was 20 minutes late!')..."></textarea>
+
+                    <!-- Quick Sample Prompts for Mumbai Transit -->
+                    <div class="flex flex-wrap items-center gap-2 text-xs">
+                        <span class="text-slate-400 font-semibold">Try Mumbai sample:</span>
+                        <button data-sample="Extreme crowd crush at Dadar Junction platform 3 during morning rush hour on Western Line! FOB staircase jammed." class="sample-nlp-prompt bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700 transition">🔥 Dadar Peak Rush Crush</button>
+                        <button data-sample="The new underground Metro Line 3 Aqua Line from Aarey JVLR to BKC is super quiet, clean, and fast!" class="sample-nlp-prompt bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700 transition">🌟 Metro 3 Aqua Line Praise</button>
+                        <button data-sample="UTS mobile app geolocation error at CSMT booking counter prevented purchasing local train ticket." class="sample-nlp-prompt bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700 transition">💳 UTS Mobile App Failure</button>
+                        <button data-sample="Mumbai Monorail between Chembur and Wadala Bridge has 40 min headway and AC was not working." class="sample-nlp-prompt bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700 transition">🚝 Monorail Headway & AC</button>
+                        <button data-sample="BEST AC Bus A-115 at Churchgate Station had polite driver and smooth ride to Nariman Point." class="sample-nlp-prompt bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700 transition">🚌 BEST AC Bus Courtesy</button>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button id="btn-analyze-live" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-lg shadow-blue-600/30 flex items-center gap-2">
+                            <span>⚡</span> Run NLP Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Results Grid -->
+            <div id="nlp-analysis-results" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                
+                <div class="glass-card rounded-xl p-4 border border-slate-800 space-y-3">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🏷️</span> Service Category
+                    </div>
+                    <div>
+                        <div id="res-category" class="text-lg font-bold text-white">--</div>
+                        <div class="flex items-center justify-between text-xs text-slate-400 mt-2 mb-1">
+                            <span>Classification Confidence:</span>
+                            <span id="res-confidence" class="font-mono text-blue-400 font-bold">--%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2">
+                            <div id="res-confidence-bar" class="h-2 rounded-full bg-blue-500 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 border border-slate-800 space-y-3">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>📊</span> Sentiment Polarity
+                    </div>
+                    <div>
+                        <div id="res-sentiment" class="text-lg font-bold text-white">--</div>
+                        <div id="res-polarity" class="text-xs text-slate-400 mt-1">Polarity Score: 0.0</div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 border border-slate-800 space-y-2">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🎭</span> Commuter Emotion Spectrum
+                    </div>
+                    <div id="res-emotions-breakdown" class="space-y-1.5">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Extracted Mumbai Transit Named Entities (NER) -->
+                <div class="glass-card rounded-xl p-4 border border-slate-800 md:col-span-2 lg:col-span-3 space-y-3">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                        <span class="flex items-center gap-1.5"><span>🧩</span> Extracted Mumbai Transit Entities (NER)</span>
+                        <div class="text-xs font-normal text-slate-400">
+                            Resolved GIS Node: <span id="ner-resolved-location" class="text-cyan-300 font-semibold">--</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2">
+                        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                            <div class="text-[11px] font-semibold text-cyan-400 mb-1.5">Stations / Hubs:</div>
+                            <div id="ner-stations" class="flex flex-wrap gap-1"></div>
+                        </div>
+
+                        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                            <div class="text-[11px] font-semibold text-blue-400 mb-1.5">Transit Lines:</div>
+                            <div id="ner-lines" class="flex flex-wrap gap-1"></div>
+                        </div>
+
+                        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                            <div class="text-[11px] font-semibold text-amber-400 mb-1.5">Aspects / Equipment:</div>
+                            <div id="ner-aspects" class="flex flex-wrap gap-1"></div>
+                        </div>
+
+                        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                            <div class="text-[11px] font-semibold text-purple-400 mb-1.5">Directions / Bound:</div>
+                            <div id="ner-directions" class="flex flex-wrap gap-1"></div>
+                        </div>
+
+                        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                            <div class="text-[11px] font-semibold text-slate-400 mb-1.5">Time Context:</div>
+                            <div id="ner-times" class="flex flex-wrap gap-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= TAB 6: PUBLIC PASSENGER PORTAL ================= -->
+        <div id="tab-portal" class="tab-content hidden space-y-6">
+            <div class="max-w-2xl mx-auto glass-card rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-2xl">
+                <div class="text-center mb-6">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-600/20 border border-blue-500/40 text-blue-400 text-2xl flex items-center justify-center mx-auto mb-3">
+                        💬
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Mumbai & Navi Mumbai Passenger Feedback Portal</h2>
+                    <p class="text-xs text-slate-400 mt-1">Submit your feedback for Mumbai Local Trains, Metro Lines, Monorail, and BEST/NMMT Buses. Triaged in real time via AI.</p>
+                </div>
+
+                <form id="passenger-feedback-form" class="space-y-4">
+                    
+                    <!-- Star Rating -->
+                    <div class="text-center bg-slate-900/70 p-3 rounded-xl border border-slate-800">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1.5">How was your transit commute experience today?</label>
+                        <div class="flex items-center justify-center gap-2 text-2xl">
+                            <button type="button" data-value="1" class="portal-star-btn text-amber-400 transition hover:scale-125">★</button>
+                            <button type="button" data-value="2" class="portal-star-btn text-amber-400 transition hover:scale-125">★</button>
+                            <button type="button" data-value="3" class="portal-star-btn text-amber-400 transition hover:scale-125">★</button>
+                            <button type="button" data-value="4" class="portal-star-btn text-amber-400 transition hover:scale-125">★</button>
+                            <button type="button" data-value="5" class="portal-star-btn text-amber-400 transition hover:scale-125">★</button>
+                        </div>
+                    </div>
+
+                    <!-- Mode and Channel -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">Transportation Mode</label>
+                            <select id="portal-mode-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                                <option value="Train">Local Train (Western / Central / Harbour)</option>
+                                <option value="Metro">Mumbai Metro (Line 1 / 2A / 7 / 3)</option>
+                                <option value="Monorail">Mumbai Monorail (Chembur - Jacob Circle)</option>
+                                <option value="Bus">City Bus (BEST / NMMT)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">Submission Channel</label>
+                            <select id="portal-channel-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                                <option value="Mobile App">Mobile App (M-Indicator / UTS / Chalo)</option>
+                                <option value="Web Portal">Web Portal</option>
+                                <option value="Social Media">Social Media (Twitter @RailMinIndia / @myBESTBus)</option>
+                                <option value="Email">Customer Email</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Station and Line (Optional) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">Transit Line / Route</label>
+                            <select id="portal-line-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                                <option value="">Auto-detect from comment text</option>
+                                <option value="LOCAL-WESTERN">Western Line Local (Churchgate - Virar)</option>
+                                <option value="LOCAL-CENTRAL">Central Main Line Local (CSMT - Kalyan)</option>
+                                <option value="LOCAL-HARBOUR">Harbour Line Local (CSMT - Panvel)</option>
+                                <option value="METRO-LINE-1">Metro Line 1 (Versova - Ghatkopar)</option>
+                                <option value="METRO-LINE-2A">Metro Line 2A & 7 (Dahisar - Andheri / Gundavali)</option>
+                                <option value="METRO-LINE-3">Metro Line 3 Aqua Line (Aarey JVLR - BKC - Cuffe Parade)</option>
+                                <option value="MONORAIL-LINE">Mumbai Monorail (Chembur - Jacob Circle)</option>
+                                <option value="BUS-BEST-302">BEST Bus 302 (Kurla - BKC - Bandra)</option>
+                                <option value="BUS-BEST-A115">BEST AC Bus A-115 (CSMT - Churchgate - Nariman Pt)</option>
+                                <option value="BUS-NMMT-105">NMMT AC Bus 105 (Vashi - Nerul - Belapur - Panvel)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">Station / Stop Location</label>
+                            <select id="portal-station-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                                <option value="">Auto-detect from comment text</option>
+                                <option value="MUM-01">Churchgate Station</option>
+                                <option value="MUM-03">Dadar Junction</option>
+                                <option value="MUM-04">Bandra Station</option>
+                                <option value="MUM-05">Andheri Station Interchange</option>
+                                <option value="MUM-07">Borivali Station</option>
+                                <option value="MUM-09">CSMT (Chhatrapati Shivaji Maharaj Terminus)</option>
+                                <option value="MUM-11">Kurla Junction</option>
+                                <option value="MUM-12">Ghatkopar Station Interchange</option>
+                                <option value="MUM-14">Thane Junction</option>
+                                <option value="MUM-15">Kalyan Junction</option>
+                                <option value="MUM-16">Wadala Bridge Monorail & Harbour</option>
+                                <option value="MUM-17">Chembur Station Interchange</option>
+                                <option value="MUM-18">Vashi Station Hub (Navi Mumbai)</option>
+                                <option value="MUM-19">Nerul LP / Station (Navi Mumbai)</option>
+                                <option value="MUM-20">CBD Belapur Terminal (Navi Mumbai)</option>
+                                <option value="MUM-21">Panvel Terminus (Navi Mumbai)</option>
+                                <option value="MUM-23">D.N. Nagar Metro Interchange</option>
+                                <option value="MUM-31">BKC (Bandra Kurla Complex) Hub</option>
+                                <option value="MUM-36">Jacob Circle Monorail</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Comment textarea -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Your Detailed Comments or Complaint</label>
+                        <textarea id="portal-feedback-text" rows="4" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 placeholder-slate-500" placeholder="Please describe what happened (e.g. delay at Kurla, AC not working in local train, overcrowded platform at Dadar, bus bunching on SCLR, polite driver praise)..."></textarea>
+                    </div>
+
+                    <!-- Live AI Instant Triage Preview -->
+                    <div id="portal-ai-preview" class="hidden bg-slate-900/90 rounded-xl p-3 border border-slate-800 text-xs space-y-1.5 animate-fadeIn">
+                        <div class="text-[11px] font-semibold text-blue-400 uppercase tracking-wider">⚡ Instant AI Classification Preview</div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-slate-400">Category: <strong id="preview-category" class="text-white">--</strong></span>
+                            <span id="preview-sentiment-badge" class="px-2 py-0.5 rounded text-xs font-bold">Sentiment: <span id="preview-sentiment">--</span></span>
+                            <span class="text-slate-400">Detected Emotion: <strong id="preview-emotion" class="text-purple-300">--</strong></span>
+                        </div>
+                    </div>
+
+                    <button id="btn-submit-feedback" type="submit" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition shadow-lg shadow-blue-600/30">
+                        Submit Mumbai Passenger Feedback
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ================= MODAL 1: CREATE NEW CUSTOM ACTION DIRECTIVE ================= -->
+    <div id="modal-create-action" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+        <div class="glass-card max-w-xl w-full rounded-2xl p-6 border border-slate-700 shadow-2xl space-y-4 animate-fadeIn">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">➕</span>
+                    <h3 class="text-base font-bold text-white">Create Custom Operational Directive</h3>
+                </div>
+                <button onclick="closeCreateActionModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+            </div>
+
+            <form id="form-create-custom-action" class="space-y-3.5 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Directive / Action Title *</label>
+                    <input id="create-act-title" type="text" required placeholder="e.g. Deploy 4 Standby Marshals & Open Extra FOB Gate at Dadar" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">Service Category</label>
+                        <select id="create-act-category" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                            <option value="Overcrowding & Capacity">Overcrowding & Capacity</option>
+                            <option value="Punctuality & Delays">Punctuality & Delays</option>
+                            <option value="Safety, Security & Lighting">Safety, Security & Lighting</option>
+                            <option value="Ticketing, Smart Cards & Fares">Ticketing, Smart Cards & Fares</option>
+                            <option value="Cleanliness & Hygiene">Cleanliness & Hygiene</option>
+                            <option value="HVAC & Vehicle Comfort">HVAC & Vehicle Comfort</option>
+                            <option value="Accessibility & Special Needs">Accessibility & Special Needs</option>
+                            <option value="Driver & Staff Behavior">Driver & Staff Behavior</option>
+                            <option value="Route Frequency & Network Coverage">Route Frequency & Network Coverage</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">Target Location / Station / Line *</label>
+                        <input id="create-act-location" type="text" required placeholder="e.g. Dadar Junction / Western Line" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">Priority Level</label>
+                        <select id="create-act-priority" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                            <option value="Critical">🔴 Critical (Immediate Action)</option>
+                            <option value="High" selected>🟠 High Priority</option>
+                            <option value="Medium">🟡 Medium Priority</option>
+                            <option value="Low">🔵 Low Priority</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">Assigned Transport Authority / Dept</label>
+                        <select id="create-act-dept" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                            <option value="Central / Western Railway Divisional Operations">Central / Western Railway Operations</option>
+                            <option value="MMRDA / Maha Mumbai Metro Operations (MMMOCL)">MMRDA / Mumbai Metro Operations</option>
+                            <option value="Mumbai Monorail Operations Division">Mumbai Monorail Operations</option>
+                            <option value="BEST Undertaking Bus Operations">BEST Undertaking Bus Operations</option>
+                            <option value="NMMT Bus Operations (Navi Mumbai)">NMMT Bus Operations (Navi Mumbai)</option>
+                            <option value="Transit Police (GRP & RPF Security)">Transit Police (GRP & RPF)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Root Cause & Context Notes</label>
+                    <textarea id="create-act-root-cause" rows="2" placeholder="Briefly describe the operational bottleneck, commuter pain point, or trigger..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200"></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Prescriptive Operational Directive / Action Details *</label>
+                    <textarea id="create-act-action" rows="3" required placeholder="Specify step-by-step action (e.g. 'Deploy 6 marshals, adjust train headway to 3 mins, open emergency gates')..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">Projected Impact / Expected Outcome</label>
+                        <input id="create-act-impact" type="text" placeholder="e.g. 40% reduction in platform crowd and +20 pts CSAT" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">Supervisor / Authority Remarks (Optional)</label>
+                        <input id="create-act-notes" type="text" placeholder="e.g. Approved for peak morning slot 08:00-11:00" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="closeCreateActionModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold transition shadow-lg shadow-blue-600/30">Save & Create Directive</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 2: EDIT ACTION & ADD CUSTOM SUGGESTIONS ================= -->
+    <div id="modal-edit-action" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+        <div class="glass-card max-w-xl w-full rounded-2xl p-6 border border-slate-700 shadow-2xl space-y-4 animate-fadeIn">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">✏️</span>
+                    <h3 class="text-base font-bold text-white">Edit Operational Action & Add Suggestions</h3>
+                    <span id="edit-modal-rec-id" class="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-blue-300">--</span>
+                </div>
+                <button onclick="closeEditActionModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+            </div>
+
+            <form id="form-edit-action" class="space-y-3.5 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Directive Title</label>
+                    <input id="edit-act-title" type="text" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">Priority Level</label>
+                        <select id="edit-act-priority" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                            <option value="Critical">🔴 Critical (Immediate Action)</option>
+                            <option value="High">🟠 High Priority</option>
+                            <option value="Medium">🟡 Medium Priority</option>
+                            <option value="Low">🔵 Low Priority</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">Assigned Department / Agency</label>
+                        <select id="edit-act-dept" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                            <option value="Central / Western Railway Divisional Operations">Central / Western Railway Operations</option>
+                            <option value="MMRDA / Maha Mumbai Metro Operations (MMMOCL)">MMRDA / Mumbai Metro Operations</option>
+                            <option value="Mumbai Monorail Operations Division">Mumbai Monorail Operations</option>
+                            <option value="BEST Undertaking / NMMT Bus Operations">BEST / NMMT Bus Operations</option>
+                            <option value="Transit Police & GRP/RPF Security">Transit Police (GRP/RPF Security)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Prescriptive Action / Customized Directive</label>
+                    <textarea id="edit-act-action" rows="3" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-purple-300 mb-1">Authority Remarks / Additional Suggestions</label>
+                    <textarea id="edit-act-notes" rows="2" placeholder="Add your custom suggestions, execution notes, or supervisory remarks here..." class="w-full bg-slate-900 border border-purple-800/60 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-purple-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Projected Impact / Expected Outcome</label>
+                    <input id="edit-act-impact" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                </div>
+
+                <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+                    <button type="button" onclick="closeEditActionModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition">Cancel</button>
+                    <div class="flex items-center gap-2">
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-semibold transition">Save Changes</button>
+                        <button type="button" id="btn-edit-save-and-approve" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold transition shadow-lg shadow-blue-600/30">Save & Approve Action</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="glass-card border-t border-slate-800/80 py-4 px-6 text-center text-xs text-slate-500">
+        <p>TransitPulse AI • Mumbai Metropolitan Region (MMR) Public Transport Feedback Intelligence & Decision Support Platform • Bus, Train, Metro, Monorail</p>
+    </footer>
+
+    <!-- Frontend JS Modules -->
+    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/actions.js"></script>
+    <script src="/static/js/nlp_lab.js"></script>
+    <script src="/static/js/portal.js"></script>
+    <script src="/static/js/simulator.js"></script>
+</body>
+</html>

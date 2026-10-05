@@ -1,0 +1,196 @@
+{
+  "city": "Mumbai Metropolitan Region (MMR)",
+  "center": [19.0760, 72.8777],
+  "zoom": 11,
+  "modes": ["Bus", "Train", "Metro", "Monorail"],
+  "lines": [
+    {
+      "id": "LOCAL-WESTERN",
+      "name": "Western Line Local (Churchgate - Virar)",
+      "mode": "Train",
+      "color": "#EF4444",
+      "stations": ["MUM-01", "MUM-02", "MUM-03", "MUM-04", "MUM-05", "MUM-06", "MUM-07", "MUM-08"],
+      "coordinates": [
+        [18.9322, 72.8264],
+        [18.9696, 72.8194],
+        [19.0178, 72.8478],
+        [19.0544, 72.8402],
+        [19.1197, 72.8464],
+        [19.1860, 72.8485],
+        [19.2288, 72.8566],
+        [19.2812, 72.8562]
+      ]
+    },
+    {
+      "id": "LOCAL-CENTRAL",
+      "name": "Central Main Line Local (CSMT - Kalyan)",
+      "mode": "Train",
+      "color": "#F97316",
+      "stations": ["MUM-09", "MUM-10", "MUM-03", "MUM-11", "MUM-12", "MUM-13", "MUM-14", "MUM-15"],
+      "coordinates": [
+        [18.9401, 72.8355],
+        [18.9734, 72.8329],
+        [19.0178, 72.8478],
+        [19.0657, 72.8793],
+        [19.0863, 72.9080],
+        [19.1105, 72.9254],
+        [19.1860, 72.9759],
+        [19.2437, 73.1355]
+      ]
+    },
+    {
+      "id": "LOCAL-HARBOUR",
+      "name": "Harbour Line Local (CSMT - Panvel)",
+      "mode": "Train",
+      "color": "#3B82F6",
+      "stations": ["MUM-09", "MUM-16", "MUM-11", "MUM-17", "MUM-18", "MUM-19", "MUM-20", "MUM-21"],
+      "coordinates": [
+        [18.9401, 72.8355],
+        [19.0170, 72.8580],
+        [19.0657, 72.8793],
+        [19.0626, 72.9272],
+        [19.0771, 72.9986],
+        [19.0330, 73.0169],
+        [19.0185, 73.0392],
+        [18.9894, 73.1175]
+      ]
+    },
+    {
+      "id": "METRO-LINE-1",
+      "name": "Metro Line 1 (Versova - Ghatkopar Blue Line)",
+      "mode": "Metro",
+      "color": "#0284C7",
+      "stations": ["MUM-22", "MUM-23", "MUM-05", "MUM-24", "MUM-25", "MUM-12"],
+      "coordinates": [
+        [19.1310, 72.8184],
+        [19.1250, 72.8360],
+        [19.1197, 72.8464],
+        [19.1120, 72.8680],
+        [19.1060, 72.8840],
+        [19.0863, 72.9080]
+      ]
+    },
+    {
+      "id": "METRO-LINE-2A",
+      "name": "Metro Line 2A & 7 (Dahisar - Andheri West / Gundavali)",
+      "mode": "Metro",
+      "color": "#EAB308",
+      "stations": ["MUM-08", "MUM-26", "MUM-27", "MUM-28", "MUM-23", "MUM-24"],
+      "coordinates": [
+        [19.2812, 72.8562],
+        [19.2310, 72.8420],
+        [19.1870, 72.8410],
+        [19.1620, 72.8510],
+        [19.1250, 72.8360],
+        [19.1120, 72.8680]
+      ]
+    },
+    {
+      "id": "METRO-LINE-3",
+      "name": "Metro Line 3 Aqua Line (Aarey JVLR - BKC - Cuffe Parade)",
+      "mode": "Metro",
+      "color": "#06B6D4",
+      "stations": ["MUM-29", "MUM-30", "MUM-31", "MUM-01", "MUM-32"],
+      "coordinates": [
+        [19.1450, 72.8750],
+        [19.1140, 72.8620],
+        [19.0660, 72.8640],
+        [18.9322, 72.8264],
+        [18.9150, 72.8180]
+      ]
+    },
+    {
+      "id": "MONORAIL-LINE",
+      "name": "Mumbai Monorail (Chembur - Wadala - Jacob Circle)",
+      "mode": "Monorail",
+      "color": "#10B981",
+      "stations": ["MUM-17", "MUM-33", "MUM-16", "MUM-34", "MUM-35", "MUM-36"],
+      "coordinates": [
+        [19.0626, 72.9272],
+        [19.0380, 72.8870],
+        [19.0170, 72.8580],
+        [19.0060, 72.8420],
+        [18.9950, 72.8310],
+        [18.9830, 72.8280]
+      ]
+    },
+    {
+      "id": "BUS-BEST-302",
+      "name": "BEST Bus Route 302 (Kurla Stn - BKC - Bandra Stn)",
+      "mode": "Bus",
+      "color": "#8B5CF6",
+      "stations": ["MUM-11", "MUM-31", "MUM-04"],
+      "coordinates": [
+        [19.0657, 72.8793],
+        [19.0660, 72.8640],
+        [19.0544, 72.8402]
+      ]
+    },
+    {
+      "id": "BUS-BEST-A115",
+      "name": "BEST AC Bus A-115 (CSMT - Churchgate - Nariman Point)",
+      "mode": "Bus",
+      "color": "#EC4899",
+      "stations": ["MUM-09", "MUM-01", "MUM-37"],
+      "coordinates": [
+        [18.9401, 72.8355],
+        [18.9322, 72.8264],
+        [18.9260, 72.8230]
+      ]
+    },
+    {
+      "id": "BUS-NMMT-105",
+      "name": "NMMT AC Bus 105 (Vashi - Nerul - CBD Belapur - Panvel)",
+      "mode": "Bus",
+      "color": "#14B8A6",
+      "stations": ["MUM-18", "MUM-19", "MUM-20", "MUM-38", "MUM-21"],
+      "coordinates": [
+        [19.0771, 72.9986],
+        [19.0330, 73.0169],
+        [19.0185, 73.0392],
+        [19.0280, 73.0650],
+        [18.9894, 73.1175]
+      ]
+    }
+  ],
+  "stations": [
+    { "id": "MUM-01", "name": "Churchgate Station", "lat": 18.9322, "lng": 72.8264, "modes": ["Train", "Metro", "Bus"], "is_interchange": true, "zone": "South Mumbai" },
+    { "id": "MUM-02", "name": "Mumbai Central", "lat": 18.9696, "lng": 72.8194, "modes": ["Train", "Bus"], "is_interchange": true, "zone": "South Mumbai" },
+    { "id": "MUM-03", "name": "Dadar Junction (Western & Central)", "lat": 19.0178, "lng": 72.8478, "modes": ["Train", "Bus"], "is_interchange": true, "zone": "Central Mumbai" },
+    { "id": "MUM-04", "name": "Bandra Terminus / Station", "lat": 19.0544, "lng": 72.8402, "modes": ["Train", "Bus"], "is_interchange": true, "zone": "Western Suburbs" },
+    { "id": "MUM-05", "name": "Andheri Station Interchange", "lat": 19.1197, "lng": 72.8464, "modes": ["Train", "Metro", "Bus"], "is_interchange": true, "zone": "Western Suburbs" },
+    { "id": "MUM-06", "name": "Goregaon Station", "lat": 19.1860, "lng": 72.8485, "modes": ["Train", "Bus"], "is_interchange": false, "zone": "Western Suburbs" },
+    { "id": "MUM-07", "name": "Borivali Station", "lat": 19.2288, "lng": 72.8566, "modes": ["Train", "Bus"], "is_interchange": true, "zone": "Western Suburbs" },
+    { "id": "MUM-08", "name": "Dahisar Station Interchange", "lat": 19.2812, "lng": 72.8562, "modes": ["Train", "Metro", "Bus"], "is_interchange": true, "zone": "Western Suburbs" },
+    { "id": "MUM-09", "name": "CSMT (Chhatrapati Shivaji Maharaj Terminus)", "lat": 18.9401, "lng": 72.8355, "modes": ["Train", "Bus"], "is_interchange": true, "zone": "South Mumbai" },
+    { "id": "MUM-10", "name": "Byculla Station", "lat": 18.9734, "lng": 72.8329, "modes": ["Train", "Bus"], "is_interchange": false, "zone": "South Mumbai" },
+    { "id": "MUM-11", "name": "Kurla Junction Interchange", "lat": 19.0657, "lng": 72.8793, "modes": ["Train", "Bus"], "is_interchange": true, "zone": "Central Suburbs" },
+    { "id": "MUM-12", "name": "Ghatkopar Station Interchange", "lat": 19.0863, "lng": 72.9080, "modes": ["Train", "Metro", "Bus"], "is_interchange": true, "zone": "Eastern Suburbs" },
+    { "id": "MUM-13", "name": "Bhandup / Vikhroli Hub", "lat": 19.1105, "lng": 72.9254, "modes": ["Train", "Bus"], "is_interchange": false, "zone": "Eastern Suburbs" },
+    { "id": "MUM-14", "name": "Thane Junction", "lat": 19.1860, "lng": 72.9759, "modes": ["Train", "Bus"], "is_interchange": true, "zone": "Thane Region" },
+    { "id": "MUM-15", "name": "Kalyan Junction", "lat": 19.2437, "lng": 73.1355, "modes": ["Train", "Bus"], "is_interchange": true, "zone": "Thane / Extended MMR" },
+    { "id": "MUM-16", "name": "Wadala Bridge Monorail & Harbour", "lat": 19.0170, "lng": 72.8580, "modes": ["Train", "Monorail", "Bus"], "is_interchange": true, "zone": "Central Mumbai" },
+    { "id": "MUM-17", "name": "Chembur Station Interchange", "lat": 19.0626, "lng": 72.9272, "modes": ["Train", "Monorail", "Bus"], "is_interchange": true, "zone": "Eastern Suburbs" },
+    { "id": "MUM-18", "name": "Vashi Sector 17 / Station Hub", "lat": 19.0771, "lng": 72.9986, "modes": ["Train", "Bus"], "is_interchange": true, "zone": "Navi Mumbai" },
+    { "id": "MUM-19", "name": "Nerul LP / Station", "lat": 19.0330, "lng": 73.0169, "modes": ["Train", "Bus"], "is_interchange": true, "zone": "Navi Mumbai" },
+    { "id": "MUM-20", "name": "CBD Belapur Terminal", "lat": 19.0185, "lng": 73.0392, "modes": ["Train", "Bus"], "is_interchange": true, "zone": "Navi Mumbai" },
+    { "id": "MUM-21", "name": "Panvel Terminus", "lat": 18.9894, "lng": 73.1175, "modes": ["Train", "Bus"], "is_interchange": true, "zone": "Navi Mumbai" },
+    { "id": "MUM-22", "name": "Versova Metro Station", "lat": 19.1310, "lng": 72.8184, "modes": ["Metro", "Bus"], "is_interchange": false, "zone": "Western Suburbs" },
+    { "id": "MUM-23", "name": "D.N. Nagar Metro Interchange", "lat": 19.1250, "lng": 72.8360, "modes": ["Metro", "Bus"], "is_interchange": true, "zone": "Western Suburbs" },
+    { "id": "MUM-24", "name": "Western Express Highway (WEH) Metro", "lat": 19.1120, "lng": 72.8680, "modes": ["Metro", "Bus"], "is_interchange": true, "zone": "Western Suburbs" },
+    { "id": "MUM-25", "name": "Saki Naka Metro Station", "lat": 19.1060, "lng": 72.8840, "modes": ["Metro", "Bus"], "is_interchange": false, "zone": "Eastern Suburbs" },
+    { "id": "MUM-26", "name": "Borivali West Metro Station", "lat": 19.2310, "lng": 72.8420, "modes": ["Metro", "Bus"], "is_interchange": false, "zone": "Western Suburbs" },
+    { "id": "MUM-27", "name": "Malad West Metro", "lat": 19.1870, "lng": 72.8410, "modes": ["Metro", "Bus"], "is_interchange": false, "zone": "Western Suburbs" },
+    { "id": "MUM-28", "name": "Goregaon East Metro", "lat": 19.1620, "lng": 72.8510, "modes": ["Metro", "Bus"], "is_interchange": false, "zone": "Western Suburbs" },
+    { "id": "MUM-29", "name": "Aarey JVLR Metro 3", "lat": 19.1450, "lng": 72.8750, "modes": ["Metro", "Bus"], "is_interchange": false, "zone": "Western Suburbs" },
+    { "id": "MUM-30", "name": "CSMIA International Airport T2", "lat": 19.0968, "lng": 72.8745, "modes": ["Metro", "Bus"], "is_interchange": true, "zone": "Airport Hub" },
+    { "id": "MUM-31", "name": "BKC (Bandra Kurla Complex) Hub", "lat": 19.0660, "lng": 72.8640, "modes": ["Metro", "Bus"], "is_interchange": true, "zone": "Central Commercial Hub" },
+    { "id": "MUM-32", "name": "Cuffe Parade Metro 3 South", "lat": 18.9150, "lng": 72.8180, "modes": ["Metro", "Bus"], "is_interchange": false, "zone": "South Mumbai" },
+    { "id": "MUM-33", "name": "Bhakti Park Monorail", "lat": 19.0380, "lng": 72.8870, "modes": ["Monorail", "Bus"], "is_interchange": false, "zone": "Eastern Suburbs" },
+    { "id": "MUM-34", "name": "Naigaon Monorail", "lat": 19.0060, "lng": 72.8420, "modes": ["Monorail", "Bus"], "is_interchange": false, "zone": "Central Mumbai" },
+    { "id": "MUM-35", "name": "Lower Parel Monorail / Commercial Hub", "lat": 18.9950, "lng": 72.8310, "modes": ["Monorail", "Train", "Bus"], "is_interchange": true, "zone": "Central Mumbai" },
+    { "id": "MUM-36", "name": "Jacob Circle (Sant Gadge Maharaj Chowk)", "lat": 18.9830, "lng": 72.8280, "modes": ["Monorail", "Bus"], "is_interchange": true, "zone": "South Mumbai" },
+    { "id": "MUM-37", "name": "Nariman Point Business District", "lat": 18.9260, "lng": 72.8230, "modes": ["Bus"], "is_interchange": false, "zone": "South Mumbai" },
+    { "id": "MUM-38", "name": "Kharghar Hiranandani Complex", "lat": 19.0280, "lng": 73.0650, "modes": ["Bus"], "is_interchange": false, "zone": "Navi Mumbai" }
+  ]
+}
